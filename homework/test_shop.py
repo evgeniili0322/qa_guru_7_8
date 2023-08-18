@@ -2,13 +2,24 @@
 Протестируйте классы из модуля homework/models.py
 """
 import pytest
+from homework.models import Product, Cart
 
-from homework.models import Product
+
+CART = Cart()
 
 
 @pytest.fixture
-def product():
-    return Product("book", 100, "This is a book", 1000)
+def list_of_products():
+    book = Product("book", 100, "This is a book", 1000)
+    pen = Product('pen', 15, 'This is pen', 500)
+    pencil = Product('pencil', 10, 'This is pencil', 500)
+    return {'book': book, 'pen': pen, 'pencil': pencil}
+
+
+@pytest.fixture()
+def cart_with_products(list_of_products):
+    CART.products = {key: value for key, value in list_of_products}
+    return CART
 
 
 def after_buy_quantity(product, quantity):
@@ -22,29 +33,29 @@ class TestProducts:
     Например, текущий класс группирует тесты на класс Product
     """
 
-    def test_product_check_quantity(self, product):
+    def test_product_check_quantity(self, list_of_products):
         # TODO напишите проверки на метод check_quantity
+        assert list_of_products['book'].check_quantity(500)
+        assert list_of_products['book'].check_quantity(999)
+        assert list_of_products['book'].check_quantity(1000)
+        assert not list_of_products['book'].check_quantity(1001)
+        assert not list_of_products['book'].check_quantity(1500)
 
-        assert product.check_quantity(500)
-        assert product.check_quantity(999)
-        assert product.check_quantity(1000)
-        assert not product.check_quantity(1001)
-        assert not product.check_quantity(1500)
-
-    def test_product_buy(self, product):
+    def test_product_buy(self, list_of_products):
         # TODO напишите проверки на метод buy
 
-        assert after_buy_quantity(product, 1) == 999
-        assert after_buy_quantity(product, 500) == 499
-        assert after_buy_quantity(product, 499) == 0
+        assert after_buy_quantity(list_of_products['book'], 1) == 999
+        assert after_buy_quantity(list_of_products['book'], 500) == 499
+        assert after_buy_quantity(list_of_products['book'], 499) == 0
 
     @pytest.mark.parametrize("param", [1001, 1500])
-    def test_product_buy_more_than_available(self, product, param):
+    def test_product_buy_more_than_available(self, list_of_products, param):
         # TODO напишите проверки на метод buy,
         #  которые ожидают ошибку ValueError при попытке купить больше, чем есть в наличии
 
         with pytest.raises(ValueError):
-            product.buy(param)
+            list_of_products['book'].buy(param)
+
 
 class TestCart:
     """
@@ -53,3 +64,12 @@ class TestCart:
         На некоторые методы у вас может быть несколько тестов.
         Например, негативные тесты, ожидающие ошибку (используйте pytest.raises, чтобы проверить это)
     """
+    def test_cart_add_product(self, list_of_products):
+        CART.add_product(list_of_products['book'])
+        CART.add_product(list_of_products['pen'])
+        CART.add_product(list_of_products['pen'], 2)
+        CART.add_product(list_of_products['pencil'], 10)
+
+        assert CART.products[list_of_products['book']] == 1
+        assert CART.products[list_of_products['pen']] == 3
+        assert CART.products[list_of_products['pencil']] == 10
