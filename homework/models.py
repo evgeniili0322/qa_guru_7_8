@@ -13,12 +13,15 @@ class Product:
         self.description = description
         self.quantity = quantity
 
-    def check_quantity(self, quantity) -> bool:
+    def check_quantity(self, quantity: int) -> bool:
         """
         TODO Верните True если количество продукта больше или равно запрашиваемому
             и False в обратном случае
         """
-        raise NotImplementedError
+        if quantity <= 0 or type(quantity) != int:
+            raise ValueError
+        else:
+            return self.quantity >= quantity
 
     def buy(self, quantity):
         """
@@ -73,3 +76,7 @@ class Cart:
         В этом случае нужно выбросить исключение ValueError
         """
         raise NotImplementedError
+
+
+if __name__ == '__main__':
+    pen = Product('Pen', 2.5, 'This is pen', 50)

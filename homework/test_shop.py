@@ -19,7 +19,18 @@ class TestProducts:
 
     def test_product_check_quantity(self, product):
         # TODO напишите проверки на метод check_quantity
-        pass
+
+        assert product.check_quantity(500)
+        assert product.check_quantity(999)
+        assert product.check_quantity(1000)
+        assert not product.check_quantity(1001)
+        assert not product.check_quantity(1500)
+        with pytest.raises(ValueError):
+            product.check_quantity(-1)
+        with pytest.raises(ValueError):
+            product.check_quantity(0)
+        with pytest.raises(ValueError):
+            product.check_quantity(5.5)
 
     def test_product_buy(self, product):
         # TODO напишите проверки на метод buy
