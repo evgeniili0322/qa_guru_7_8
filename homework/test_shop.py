@@ -12,7 +12,7 @@ CART = Cart()
 def list_of_products():
     book = Product("book", 100, "This is a book", 1000)
     pen = Product('pen', 15, 'This is pen', 500)
-    pencil = Product('pencil', 10, 'This is pencil', 500)
+    pencil = Product('pencil', 5.5, 'This is pencil', 500)
     return {'book': book, 'pen': pen, 'pencil': pencil}
 
 
@@ -24,9 +24,11 @@ def cart_with_products(list_of_products):
     return CART
 
 
-def after_buy_quantity(product, quantity):
-    product.buy(quantity)
-    return product.quantity
+@pytest.fixture()
+def cart_with_greater_buy_count(list_of_products, cart_with_products):
+    CART.products[list_of_products['book']] = 1001
+    CART.products[list_of_products['pen']] = 501
+    CART.products[list_of_products['pencil']] = 550
 
 
 class TestProducts:
@@ -46,9 +48,13 @@ class TestProducts:
     def test_product_buy(self, list_of_products):
         # TODO напишите проверки на метод buy
 
-        assert after_buy_quantity(list_of_products['book'], 1) == 999
-        assert after_buy_quantity(list_of_products['book'], 500) == 499
-        assert after_buy_quantity(list_of_products['book'], 499) == 0
+        list_of_products['book'].buy(1)
+        list_of_products['pen'].buy(250)
+        list_of_products['pencil'].buy(500)
+
+        assert list_of_products['book'].quantity == 999
+        assert list_of_products['pen'].quantity == 250
+        assert list_of_products['pencil'].quantity == 0
 
     @pytest.mark.parametrize("param", [1001, 1500])
     def test_product_buy_more_than_available(self, list_of_products, param):
@@ -92,12 +98,26 @@ class TestCart:
         CART.remove_product(list_of_products['pencil'])
 
         with pytest.raises(KeyError):
-            print(CART.products[list_of_products['book']])
+            CART.remove_product(list_of_products['book'])
         with pytest.raises(KeyError):
-            print(CART.products[list_of_products['pen']])
+            CART.remove_product(list_of_products['pen'])
         with pytest.raises(KeyError):
-            print(CART.products[list_of_products['pencil']])
+            CART.remove_product(list_of_products['pencil'])
 
     def test_cart_clear(self, cart_with_products):
-        CART.products.clear()
+        CART.clear()
         assert CART.products == {}
+
+    def test_cart_get_total_price(self, cart_with_products):
+        assert CART.get_total_price() == 1382.5
+
+    def test_cart_buy(self, cart_with_products, list_of_products):
+        CART.buy()
+
+        assert list_of_products['book'].quantity == 990
+        assert list_of_products['pen'].quantity == 480
+        assert list_of_products['pencil'].quantity == 485
+
+    def test_cart_buy_more_than_available(self, cart_with_greater_buy_count):
+        with pytest.raises(ValueError):
+            CART.buy()

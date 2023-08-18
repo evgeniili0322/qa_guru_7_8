@@ -69,13 +69,17 @@ class Cart:
             else:
                 self.products[product] -= remove_count
         else:
-            raise ValueError('Product not in cart')
+            raise KeyError('Product not in cart')
 
     def clear(self):
         self.products.clear()
 
     def get_total_price(self) -> float:
-        raise NotImplementedError
+        result = 0
+        for key in self.products.keys():
+            for i in range(self.products[key]):
+                result += key.price
+        return result
 
     def buy(self):
         """
@@ -83,5 +87,5 @@ class Cart:
         Учтите, что товаров может не хватать на складе.
         В этом случае нужно выбросить исключение ValueError
         """
-        raise NotImplementedError
-
+        for key in self.products.keys():
+            key.buy(self.products[key])
