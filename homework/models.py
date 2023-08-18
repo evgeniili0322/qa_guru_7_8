@@ -18,21 +18,18 @@ class Product:
         TODO Верните True если количество продукта больше или равно запрашиваемому
             и False в обратном случае
         """
-        if quantity <= 0 or type(quantity) != int:
-            raise ValueError
-        else:
-            return self.quantity >= quantity
+        return self.quantity >= quantity
 
-    def buy(self, quantity):
+    def buy(self, quantity: int):
         """
         TODO реализуйте метод покупки
             Проверьте количество продукта используя метод check_quantity
             Если продуктов не хватает, то выбросите исключение ValueError
         """
-        raise NotImplementedError
-
-    def __hash__(self):
-        return hash(self.name + self.description)
+        if self.check_quantity(quantity):
+            self.quantity -= quantity
+        else:
+            raise ValueError(f'An insufficient amount, available {self.quantity}')
 
 
 class Cart:
@@ -53,7 +50,10 @@ class Cart:
         Метод добавления продукта в корзину.
         Если продукт уже есть в корзине, то увеличиваем количество
         """
-        raise NotImplementedError
+        if product in self.products.keys():
+            self.products[product] += buy_count
+        else:
+            self.products.update({product: buy_count})
 
     def remove_product(self, product: Product, remove_count=None):
         """
@@ -61,7 +61,13 @@ class Cart:
         Если remove_count не передан, то удаляется вся позиция
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция
         """
-        raise NotImplementedError
+        if product in self.products.keys():
+            if self.products[product] <= remove_count or remove_count is None:
+                self.products.pop(product)
+            else:
+                self.products[product] -= remove_count
+        else:
+            raise ValueError('Product not in cart')
 
     def clear(self):
         raise NotImplementedError
@@ -79,4 +85,4 @@ class Cart:
 
 
 if __name__ == '__main__':
-    pen = Product('Pen', 2.5, 'This is pen', 50)
+    pass

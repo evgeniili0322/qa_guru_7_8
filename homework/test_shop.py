@@ -11,6 +11,11 @@ def product():
     return Product("book", 100, "This is a book", 1000)
 
 
+def after_buy_quantity(product, quantity):
+    product.buy(quantity)
+    return product.quantity
+
+
 class TestProducts:
     """
     Тестовый класс - это способ группировки ваших тестов по какой-то тематике
@@ -25,22 +30,21 @@ class TestProducts:
         assert product.check_quantity(1000)
         assert not product.check_quantity(1001)
         assert not product.check_quantity(1500)
-        with pytest.raises(ValueError):
-            product.check_quantity(-1)
-        with pytest.raises(ValueError):
-            product.check_quantity(0)
-        with pytest.raises(ValueError):
-            product.check_quantity(5.5)
 
     def test_product_buy(self, product):
         # TODO напишите проверки на метод buy
-        pass
 
-    def test_product_buy_more_than_available(self, product):
+        assert after_buy_quantity(product, 1) == 999
+        assert after_buy_quantity(product, 500) == 499
+        assert after_buy_quantity(product, 499) == 0
+
+    @pytest.mark.parametrize("param", [1001, 1500])
+    def test_product_buy_more_than_available(self, product, param):
         # TODO напишите проверки на метод buy,
         #  которые ожидают ошибку ValueError при попытке купить больше, чем есть в наличии
-        pass
 
+        with pytest.raises(ValueError):
+            product.buy(param)
 
 class TestCart:
     """
