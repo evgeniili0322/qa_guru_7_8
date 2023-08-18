@@ -18,7 +18,9 @@ def list_of_products():
 
 @pytest.fixture()
 def cart_with_products(list_of_products):
-    CART.products = {key: value for key, value in list_of_products}
+    CART.add_product(list_of_products['book'], 10)
+    CART.add_product(list_of_products['pen'], 20)
+    CART.add_product(list_of_products['pencil'], 15)
     return CART
 
 
@@ -73,3 +75,29 @@ class TestCart:
         assert CART.products[list_of_products['book']] == 1
         assert CART.products[list_of_products['pen']] == 3
         assert CART.products[list_of_products['pencil']] == 10
+
+    def test_cart_remove_product(self, cart_with_products, list_of_products):
+        CART.remove_product(list_of_products['book'], 1)
+        CART.remove_product(list_of_products['pen'], 1)
+        CART.remove_product(list_of_products['pen'], 2)
+        CART.remove_product(list_of_products['pencil'], 14)
+
+        assert CART.products[list_of_products['book']] == 9
+        assert CART.products[list_of_products['pen']] == 17
+        assert CART.products[list_of_products['pencil']] == 1
+
+    def test_cart_remove_product_not_in_cart(self, cart_with_products, list_of_products):
+        CART.remove_product(list_of_products['book'], 10)
+        CART.remove_product(list_of_products['pen'], 21)
+        CART.remove_product(list_of_products['pencil'])
+
+        with pytest.raises(KeyError):
+            print(CART.products[list_of_products['book']])
+        with pytest.raises(KeyError):
+            print(CART.products[list_of_products['pen']])
+        with pytest.raises(KeyError):
+            print(CART.products[list_of_products['pencil']])
+
+    def test_cart_clear(self, cart_with_products):
+        CART.products.clear()
+        assert CART.products == {}

@@ -62,7 +62,9 @@ class Cart:
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция
         """
         if product in self.products.keys():
-            if self.products[product] <= remove_count or remove_count is None:
+            if remove_count is None:
+                self.products.pop(product)
+            elif self.products[product] <= remove_count:
                 self.products.pop(product)
             else:
                 self.products[product] -= remove_count
@@ -70,7 +72,7 @@ class Cart:
             raise ValueError('Product not in cart')
 
     def clear(self):
-        raise NotImplementedError
+        self.products.clear()
 
     def get_total_price(self) -> float:
         raise NotImplementedError
