@@ -8,7 +8,7 @@ from homework.models import Product, Cart
 CART = Cart()
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def list_of_products():
     book = Product("book", 100, "This is a book", 1000)
     pen = Product('pen', 15, 'This is pen', 500)
@@ -16,7 +16,7 @@ def list_of_products():
     return {'book': book, 'pen': pen, 'pencil': pencil}
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 def cart_with_products(list_of_products):
     CART.add_product(list_of_products['book'], 10)
     CART.add_product(list_of_products['pen'], 20)
@@ -24,8 +24,8 @@ def cart_with_products(list_of_products):
     return CART
 
 
-@pytest.fixture()
-def cart_with_greater_buy_count(list_of_products, cart_with_products):
+@pytest.fixture(scope='function')
+def cart_with_more_products_than_available(list_of_products, cart_with_products):
     CART.products[list_of_products['book']] = 1001
     CART.products[list_of_products['pen']] = 501
     CART.products[list_of_products['pencil']] = 550
@@ -39,6 +39,7 @@ class TestProducts:
 
     def test_product_check_quantity(self, list_of_products):
         # TODO напишите проверки на метод check_quantity
+
         assert list_of_products['book'].check_quantity(500)
         assert list_of_products['book'].check_quantity(999)
         assert list_of_products['book'].check_quantity(1000)
@@ -74,12 +75,12 @@ class TestCart:
     """
     def test_cart_add_product(self, list_of_products):
         CART.add_product(list_of_products['book'])
-        CART.add_product(list_of_products['pen'])
-        CART.add_product(list_of_products['pen'], 2)
+        CART.add_product(list_of_products['pen'], 3)
+        CART.add_product(list_of_products['pen'], 4)
         CART.add_product(list_of_products['pencil'], 10)
 
         assert CART.products[list_of_products['book']] == 1
-        assert CART.products[list_of_products['pen']] == 3
+        assert CART.products[list_of_products['pen']] == 7
         assert CART.products[list_of_products['pencil']] == 10
 
     def test_cart_remove_product(self, cart_with_products, list_of_products):
@@ -106,6 +107,7 @@ class TestCart:
 
     def test_cart_clear(self, cart_with_products):
         CART.clear()
+
         assert CART.products == {}
 
     def test_cart_get_total_price(self, cart_with_products):
@@ -118,6 +120,6 @@ class TestCart:
         assert list_of_products['pen'].quantity == 480
         assert list_of_products['pencil'].quantity == 485
 
-    def test_cart_buy_more_than_available(self, cart_with_greater_buy_count):
+    def test_cart_buy_more_than_available(self, cart_with_more_products_than_available):
         with pytest.raises(ValueError):
             CART.buy()

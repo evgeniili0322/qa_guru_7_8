@@ -29,7 +29,7 @@ class Product:
         if self.check_quantity(quantity):
             self.quantity -= quantity
         else:
-            raise ValueError(f'An insufficient amount, available {self.quantity}')
+            raise ValueError(f'More than available , currently in stock {self.quantity}')
 
 
 class Cart:
@@ -50,7 +50,7 @@ class Cart:
         Метод добавления продукта в корзину.
         Если продукт уже есть в корзине, то увеличиваем количество
         """
-        if product in self.products.keys():
+        if product in self.products:
             self.products[product] += buy_count
         else:
             self.products.update({product: buy_count})
@@ -61,7 +61,7 @@ class Cart:
         Если remove_count не передан, то удаляется вся позиция
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция
         """
-        if product in self.products.keys():
+        if product in self.products:
             if remove_count is None:
                 self.products.pop(product)
             elif self.products[product] <= remove_count:
@@ -76,9 +76,8 @@ class Cart:
 
     def get_total_price(self) -> float:
         result = 0
-        for key in self.products.keys():
-            for i in range(self.products[key]):
-                result += key.price
+        for product in self.products:
+            result += product.price * self.products[product]
         return result
 
     def buy(self):
@@ -87,5 +86,5 @@ class Cart:
         Учтите, что товаров может не хватать на складе.
         В этом случае нужно выбросить исключение ValueError
         """
-        for key in self.products.keys():
-            key.buy(self.products[key])
+        for product in self.products:
+            product.buy(self.products[product])
