@@ -88,3 +88,4 @@ class Cart:
         """
         for product in self.products:
             product.buy(self.products[product])
+        self.clear()

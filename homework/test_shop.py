@@ -5,7 +5,7 @@ import pytest
 from homework.models import Product, Cart
 
 
-CART = Cart()
+cart = Cart()
 
 
 @pytest.fixture(scope='function')
@@ -18,17 +18,17 @@ def list_of_products():
 
 @pytest.fixture(scope='function')
 def cart_with_products(list_of_products):
-    CART.add_product(list_of_products['book'], 10)
-    CART.add_product(list_of_products['pen'], 20)
-    CART.add_product(list_of_products['pencil'], 15)
-    return CART
+    cart.add_product(list_of_products['book'], 10)
+    cart.add_product(list_of_products['pen'], 20)
+    cart.add_product(list_of_products['pencil'], 15)
+    return cart
 
 
 @pytest.fixture(scope='function')
 def cart_with_more_products_than_available(list_of_products, cart_with_products):
-    CART.products[list_of_products['book']] = 1001
-    CART.products[list_of_products['pen']] = 501
-    CART.products[list_of_products['pencil']] = 550
+    cart.products[list_of_products['book']] = 1001
+    cart.products[list_of_products['pen']] = 501
+    cart.products[list_of_products['pencil']] = 550
 
 
 class TestProducts:
@@ -74,52 +74,57 @@ class TestCart:
         Например, негативные тесты, ожидающие ошибку (используйте pytest.raises, чтобы проверить это)
     """
     def test_cart_add_product(self, list_of_products):
-        CART.add_product(list_of_products['book'])
-        CART.add_product(list_of_products['pen'], 3)
-        CART.add_product(list_of_products['pen'], 4)
-        CART.add_product(list_of_products['pencil'], 10)
+        cart.add_product(list_of_products['book'])
+        cart.add_product(list_of_products['pen'], 3)
+        cart.add_product(list_of_products['pen'], 4)
+        cart.add_product(list_of_products['pencil'], 10)
 
-        assert CART.products[list_of_products['book']] == 1
-        assert CART.products[list_of_products['pen']] == 7
-        assert CART.products[list_of_products['pencil']] == 10
+        assert cart.products[list_of_products['book']] == 1
+        assert cart.products[list_of_products['pen']] == 7
+        assert cart.products[list_of_products['pencil']] == 10
 
     def test_cart_remove_product(self, cart_with_products, list_of_products):
-        CART.remove_product(list_of_products['book'], 1)
-        CART.remove_product(list_of_products['pen'], 1)
-        CART.remove_product(list_of_products['pen'], 2)
-        CART.remove_product(list_of_products['pencil'], 14)
+        cart.remove_product(list_of_products['book'], 1)
+        cart.remove_product(list_of_products['pen'], 1)
+        cart.remove_product(list_of_products['pen'], 2)
+        cart.remove_product(list_of_products['pencil'], 14)
 
-        assert CART.products[list_of_products['book']] == 9
-        assert CART.products[list_of_products['pen']] == 17
-        assert CART.products[list_of_products['pencil']] == 1
+        assert cart.products[list_of_products['book']] == 9
+        assert cart.products[list_of_products['pen']] == 17
+        assert cart.products[list_of_products['pencil']] == 1
 
     def test_cart_remove_product_not_in_cart(self, cart_with_products, list_of_products):
-        CART.remove_product(list_of_products['book'], 10)
-        CART.remove_product(list_of_products['pen'], 21)
-        CART.remove_product(list_of_products['pencil'])
+        cart.remove_product(list_of_products['book'], 10)
+        cart.remove_product(list_of_products['pen'], 21)
+        cart.remove_product(list_of_products['pencil'])
+
+        assert list_of_products['book'] not in cart.products
+        assert list_of_products['pen'] not in cart.products
+        assert list_of_products['pencil'] not in cart.products
 
         with pytest.raises(KeyError):
-            CART.remove_product(list_of_products['book'])
+            cart.remove_product(list_of_products['book'])
         with pytest.raises(KeyError):
-            CART.remove_product(list_of_products['pen'])
+            cart.remove_product(list_of_products['pen'])
         with pytest.raises(KeyError):
-            CART.remove_product(list_of_products['pencil'])
+            cart.remove_product(list_of_products['pencil'])
 
     def test_cart_clear(self, cart_with_products):
-        CART.clear()
+        cart.clear()
 
-        assert CART.products == {}
+        assert cart.products == {}
 
     def test_cart_get_total_price(self, cart_with_products):
-        assert CART.get_total_price() == 1382.5
+        assert cart.get_total_price() == 1382.5
 
     def test_cart_buy(self, cart_with_products, list_of_products):
-        CART.buy()
+        cart.buy()
 
+        assert cart.products == {}
         assert list_of_products['book'].quantity == 990
         assert list_of_products['pen'].quantity == 480
         assert list_of_products['pencil'].quantity == 485
 
     def test_cart_buy_more_than_available(self, cart_with_more_products_than_available):
         with pytest.raises(ValueError):
-            CART.buy()
+            cart.buy()
